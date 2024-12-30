@@ -1,921 +1,1591 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Panel - Dashboard</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 20px;
-            background-color: #f5f5f5;
-        }
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            background-color: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            padding-bottom: 20px;
-            border-bottom: 1px solid #eee;
-        }
-        .header h1 {
-            margin: 0;
-            color: #333;
-        }
-        .stats {
-            display: flex;
-            gap: 20px;
-            margin-bottom: 20px;
-        }
-        .stat-card {
-            background: #fff;
-            padding: 15px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            flex: 1;
-        }
-        .stat-card h3 {
-            margin: 0 0 10px 0;
-            color: #666;
-        }
-        .stat-card .number {
-            font-size: 24px;
-            font-weight: bold;
-            color: #2196F3;
-        }
-        .controls {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-        .search-box {
-            flex: 1;
-            padding: 8px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-        }
-        .filter-select {
-            padding: 8px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-        }
-        .action-btn {
-            padding: 8px 16px;
-            border: none;
-            border-radius: 4px;
-            background: #3498db;
-            color: white;
-            cursor: pointer;
-            transition: 0.3s;
-        }
-        .action-btn.export {
-            background-color: #4CAF50;
-        }
-        .action-btn.delete-all {
-            background-color: #f44336;
-        }
-        .danger-btn {
-            background: #e74c3c;
-        }
-        .danger-btn:hover {
-            background: #c0392b;
-        }
-        .action-btn:hover {
-            background: #2980b9;
-        }
-        .message-item {
-            border: 1px solid #ddd;
-            margin: 10px 0;
-            padding: 15px;
-            border-radius: 4px;
-            position: relative;
-        }
-        .message-item h3 {
-            margin-top: 0;
-            color: #2196F3;
-        }
-        .message-actions {
-            position: absolute;
-            top: 15px;
-            right: 15px;
-            display: flex;
-            gap: 10px;
-        }
-        .delete-btn {
-            background-color: #ff4444;
-            color: white;
-            border: none;
-            padding: 5px 10px;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-        .mark-btn {
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            padding: 5px 10px;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-        .delete-btn:hover {
-            background-color: #cc0000;
-        }
-        .mark-btn:hover {
-            background-color: #388E3C;
-        }
-        .marked {
-            background-color: #e3f2fd;
-        }
-        .pagination {
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-            margin-top: 20px;
-        }
-        .pagination button {
-            padding: 5px 10px;
-            border: 1px solid #ddd;
-            background: white;
-            cursor: pointer;
-        }
-        .pagination button.active {
-            background: #2196F3;
-            color: white;
-            border-color: #2196F3;
-        }
-        .no-messages {
-            text-align: center;
-            color: #666;
-            padding: 20px;
-        }
-        #loginForm {
-            max-width: 400px;
-            margin: 100px auto;
-            padding: 20px;
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        .form-group {
-            margin-bottom: 15px;
-        }
-        .form-group label {
-            display: block;
-            margin-bottom: 5px;
-        }
-        .form-group input {
-            width: 100%;
-            padding: 8px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-        }
-        #adminContent {
-            display: none;
-        }
-        .dashboard-nav {
-            background: #2c3e50;
-            padding: 15px;
-            margin-bottom: 20px;
-            border-radius: 8px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .nav-links {
-            display: flex;
-            gap: 20px;
-        }
-        .nav-link {
-            color: white;
-            text-decoration: none;
-            padding: 8px 15px;
-            border-radius: 4px;
-            transition: background 0.3s;
-        }
-        .nav-link:hover {
-            background: #34495e;
-        }
-        .nav-link.active {
-            background: #3498db;
-        }
-        .dashboard-section {
-            display: none;
-        }
-        .dashboard-section.active {
-            display: block;
-        }
-        .chart-container {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 20px;
-            margin: 20px 0;
-        }
-        .chart {
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        .notification {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            padding: 15px 25px;
-            border-radius: 4px;
-            color: white;
-            display: none;
-        }
-        .notification.success {
-            background: #2ecc71;
-        }
-        .notification.error {
-            background: #e74c3c;
-        }
-        .settings-form {
-            max-width: 600px;
-            margin: 20px auto;
-            padding: 20px;
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        .backup-section {
-            padding: 20px;
-            background: #fff;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            margin-top: 20px;
-        }
-        
-        .backup-section h2 {
-            margin-top: 0;
-            color: #2c3e50;
-            font-size: 1.5em;
-            margin-bottom: 15px;
-        }
-        
-        .backup-section button {
-            margin: 10px 0 20px 0;
-        }
-        
-        .backup-section input[type="file"] {
-            display: none;
-        }
-        
-        .backup-section .file-input-label {
-            display: inline-block;
-            padding: 8px 16px;
-            background: #3498db;
-            color: white;
-            border-radius: 4px;
-            cursor: pointer;
-            margin-bottom: 10px;
-            transition: 0.3s;
-        }
-        
-        .backup-section .file-input-label:hover {
-            background: #2980b9;
-        }
-        .user-info {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            color: white;
-        }
-        .user-avatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: #3498db;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-        }
-        .message-priority {
-            padding: 3px 8px;
-            border-radius: 3px;
-            font-size: 12px;
-            margin-left: 10px;
-        }
-        .priority-high {
-            background: #e74c3c;
-            color: white;
-        }
-        .priority-medium {
-            background: #f1c40f;
-            color: black;
-        }
-        .priority-low {
-            background: #2ecc71;
-            color: white;
-        }
-        .visitor-list-container {
-            margin-top: 20px;
-        }
-        .visitor-table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        .visitor-table th, .visitor-table td {
-            border: 1px solid #ddd;
-            padding: 10px;
-            text-align: left;
-        }
-        .visitor-table th {
-            background: #f5f5f5;
-        }
-        /* Settings Styles */
-        .settings-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 20px;
-            padding: 20px;
-        }
-        .settings-card {
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        .settings-card h3 {
-            margin-top: 0;
-            color: #2c3e50;
-            border-bottom: 2px solid #eee;
-            padding-bottom: 10px;
-        }
-        .settings-form {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-        .settings-form label {
-            font-weight: bold;
-            color: #34495e;
-        }
-        .settings-form input[type="text"],
-        .settings-form input[type="password"],
-        .settings-form input[type="email"],
-        .settings-form select {
-            padding: 8px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            font-size: 14px;
-        }
-        .settings-form .checkbox-group {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
+// Admin credentials (in real world, this should be server-side)
+let ADMIN_CREDENTIALS = {
+    username: 'admin',
+    password: 'admin123'
+};
 
-        /* Activity Log Styles */
-        .activity-list {
-            max-height: 500px;
-            overflow-y: auto;
-        }
-        .activity-item {
-            padding: 15px;
-            border-bottom: 1px solid #eee;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-        .activity-icon {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-        }
-        .activity-icon.login { background-color: #4CAF50; }
-        .activity-icon.settings { background-color: #2196F3; }
-        .activity-icon.messages { background-color: #FF9800; }
-        .activity-icon.data { background-color: #F44336; }
-        .activity-content {
-            flex: 1;
-        }
-        .activity-time {
-            color: #666;
-            font-size: 0.9em;
-        }
-        .activity-filters {
-            margin-bottom: 20px;
-            display: flex;
-            gap: 15px;
-        }
-        .activity-filters select,
-        .activity-filters input {
-            padding: 8px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-        }
+// Load saved credentials on startup
+const savedCredentials = localStorage.getItem('adminCredentials');
+if (savedCredentials) {
+    ADMIN_CREDENTIALS = JSON.parse(savedCredentials);
+}
 
-        /* Reports Styles */
-        .reports-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 20px;
-            margin-top: 20px;
-        }
-        .report-card {
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        .report-actions {
-            margin-top: 15px;
-        }
-        .report-form {
-            margin-top: 15px;
-        }
-        .checkbox-group {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            margin-top: 10px;
-        }
-        .checkbox-group label {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-    </style>
-</head>
-<body>
-    <div id="loginForm">
-        <h2>Admin Login</h2>
-        <div class="form-group">
-            <label for="username">Username</label>
-            <input type="text" id="username" required>
-        </div>
-        <div class="form-group">
-            <label for="password">Password</label>
-            <input type="password" id="password" required>
-        </div>
-        <button onclick="login()" class="action-btn">Login</button>
-    </div>
+// Global variables
+let currentPage = 1;
+const messagesPerPage = 5;
+let filteredMessages = [];
+let messageChart = null;
+let priorityChart = null;
+let visitorChart = null;
+let deviceChart = null;
+let locationChart = null;
+let timeSpentChart = null;
 
-    <div id="adminContent" class="container">
-        <div class="dashboard-nav">
-            <div class="nav-links">
-                <a href="#" class="nav-link active" data-section="messages">
-                    <i class="fas fa-envelope"></i> Messages
-                </a>
-                <a href="#" class="nav-link" data-section="visitors">
-                    <i class="fas fa-users"></i> Visitors
-                </a>
-                <a href="#" class="nav-link" data-section="analytics">
-                    <i class="fas fa-chart-line"></i> Analytics
-                </a>
-                <a href="#" class="nav-link" data-section="settings">
-                    <i class="fas fa-cog"></i> Settings
-                </a>
-                <a href="#" class="nav-link" data-section="backup">
-                    <i class="fas fa-database"></i> Backup
-                </a>
-                <a href="#" class="nav-link" data-section="activity">
-                    <i class="fas fa-history"></i> Activity Log
-                </a>
-                <a href="#" class="nav-link" data-section="reports">
-                    <i class="fas fa-file-alt"></i> Reports
-                </a>
-            </div>
-            <div class="user-info">
-                <div class="user-avatar">
-                    <i class="fas fa-user"></i>
-                </div>
-                <span id="adminName">Admin</span>
-                <button onclick="logout()" class="action-btn">
-                    <i class="fas fa-sign-out-alt"></i> Logout
+// Login functionality
+function login() {
+    const username = document.getElementById('username').value;
+    const password = document.getElementById('password').value;
+
+    if (username === ADMIN_CREDENTIALS.username && password === ADMIN_CREDENTIALS.password) {
+        document.getElementById('loginForm').style.display = 'none';
+        document.getElementById('adminContent').style.display = 'block';
+        initializeCharts(); // Initialize charts first
+        loadMessages();
+        loadVisitorStats(); // Load visitor statistics
+        loadSettings(); // Load saved settings
+        showNotification('Login successful!', 'success');
+        logActivity('login', 'Admin logged in successfully');
+    } else {
+        showNotification('Invalid credentials!', 'error');
+    }
+}
+
+function logout() {
+    document.getElementById('loginForm').style.display = 'block';
+    document.getElementById('adminContent').style.display = 'none';
+    document.getElementById('username').value = '';
+    document.getElementById('password').value = '';
+    showNotification('Logged out successfully!', 'success');
+}
+
+// Navigation
+document.querySelectorAll('.nav-link').forEach(link => {
+    link.addEventListener('click', (e) => {
+        e.preventDefault();
+        const section = e.target.closest('.nav-link').dataset.section;
+        
+        // Update active states
+        document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+        document.querySelectorAll('.dashboard-section').forEach(s => s.classList.remove('active'));
+        
+        e.target.closest('.nav-link').classList.add('active');
+        document.getElementById(section + 'Section').classList.add('active');
+    });
+});
+
+// Message handling functions
+function loadMessages() {
+    try {
+        const messages = JSON.parse(localStorage.getItem('contactMessages')) || [];
+        updateStats(messages);
+        applyFiltersAndSearch();
+        if (messageChart && priorityChart) {
+            updateAnalytics(messages);
+        }
+    } catch (error) {
+        console.error('Error loading messages:', error);
+        showNotification('Error loading messages', 'error');
+    }
+}
+
+function updateStats(messages) {
+    const today = new Date().toLocaleDateString();
+    
+    const totalMessages = messages.length;
+    const unreadMessages = messages.filter(msg => !msg.read).length;
+    const todayMessages = messages.filter(msg => 
+        new Date(msg.date).toLocaleDateString() === today
+    ).length;
+
+    document.getElementById('totalMessages').textContent = totalMessages;
+    document.getElementById('unreadMessages').textContent = unreadMessages;
+    document.getElementById('todayMessages').textContent = todayMessages;
+}
+
+function displayMessages(messagesToShow) {
+    const messageList = document.getElementById('messageList');
+    messageList.innerHTML = '';
+
+    if (messagesToShow.length === 0) {
+        messageList.innerHTML = '<div class="no-messages">No messages found</div>';
+        return;
+    }
+
+    const startIndex = (currentPage - 1) * messagesPerPage;
+    const endIndex = startIndex + messagesPerPage;
+    const pageMessages = messagesToShow.slice(startIndex, endIndex);
+
+    pageMessages.forEach((msg, index) => {
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `message-item ${msg.marked ? 'marked' : ''} ${msg.read ? '' : 'unread'} ${msg.isSpam ? 'spam' : ''}`;
+        
+        const priorityClass = msg.priority === 'high' ? 'priority-high' : 
+                            msg.priority === 'medium' ? 'priority-medium' : 'priority-low';
+        
+        messageDiv.innerHTML = `
+            <h3>Message #${startIndex + index + 1}
+                <span class="message-priority ${priorityClass}">
+                    ${msg.priority || 'low'} priority
+                </span>
+                ${msg.isSpam ? '<span class="spam-badge"><i class="fas fa-ban"></i> Spam</span>' : ''}
+            </h3>
+            <p><strong>Name:</strong> ${msg.name}</p>
+            <p><strong>Email:</strong> ${msg.email}</p>
+            <p><strong>Message:</strong> ${msg.message}</p>
+            <p><strong>Date:</strong> ${msg.date}</p>
+            <div class="message-actions">
+                <button onclick="toggleMarkMessage(${startIndex + index})" class="mark-btn">
+                    ${msg.marked ? 'Unmark' : 'Mark'}
+                </button>
+                <button onclick="setPriority(${startIndex + index})" class="action-btn">
+                    <i class="fas fa-flag"></i>
+                </button>
+                <button onclick="markAsSpam(${startIndex + index})" class="action-btn ${msg.isSpam ? 'active' : ''}">
+                    <i class="fas fa-ban"></i>
+                </button>
+                <button onclick="deleteMessage(${startIndex + index})" class="delete-btn">
+                    <i class="fas fa-trash"></i>
                 </button>
             </div>
-        </div>
+        `;
+        messageList.appendChild(messageDiv);
+    });
 
-        <!-- Messages Section -->
-        <div id="messagesSection" class="dashboard-section active">
-            <div class="header">
-                <h1><i class="fas fa-envelope"></i> Contact Form Messages</h1>
-            </div>
+    updatePagination(messagesToShow.length);
+}
 
-            <div class="stats">
-                <div class="stat-card">
-                    <h3>Total Messages</h3>
-                    <div id="totalMessages" class="number">0</div>
-                </div>
-                <div class="stat-card">
-                    <h3>Unread Messages</h3>
-                    <div id="unreadMessages" class="number">0</div>
-                </div>
-                <div class="stat-card">
-                    <h3>Today's Messages</h3>
-                    <div id="todayMessages" class="number">0</div>
-                </div>
-            </div>
+function updatePagination(totalMessages) {
+    const totalPages = Math.ceil(totalMessages / messagesPerPage);
+    const pagination = document.getElementById('pagination');
+    pagination.innerHTML = '';
 
-            <div class="controls">
-                <input type="text" id="searchBox" class="search-box" placeholder="Search messages...">
-                <select id="filterSelect" class="filter-select">
-                    <option value="all">All Messages</option>
-                    <option value="unread">Unread Only</option>
-                    <option value="marked">Marked Only</option>
-                    <option value="today">Today Only</option>
-                    <option value="high-priority">High Priority</option>
-                    <option value="spam">Spam</option>
-                </select>
-                <select id="sortSelect" class="filter-select">
-                    <option value="newest">Newest First</option>
-                    <option value="oldest">Oldest First</option>
-                    <option value="priority">By Priority</option>
-                </select>
-                <button onclick="exportMessages()" class="action-btn export">
-                    <i class="fas fa-file-export"></i> Export
+    if (totalPages <= 1) return;
+
+    // Previous button
+    const prevButton = document.createElement('button');
+    prevButton.textContent = '←';
+    prevButton.onclick = () => {
+        if (currentPage > 1) {
+            currentPage--;
+            applyFiltersAndSearch();
+        }
+    };
+    pagination.appendChild(prevButton);
+
+    // Page buttons
+    for (let i = 1; i <= totalPages; i++) {
+        const pageButton = document.createElement('button');
+        pageButton.textContent = i;
+        pageButton.className = i === currentPage ? 'active' : '';
+        pageButton.onclick = () => {
+            currentPage = i;
+            applyFiltersAndSearch();
+        };
+        pagination.appendChild(pageButton);
+    }
+
+    // Next button
+    const nextButton = document.createElement('button');
+    nextButton.textContent = '→';
+    nextButton.onclick = () => {
+        if (currentPage < totalPages) {
+            currentPage++;
+            applyFiltersAndSearch();
+        }
+    };
+    pagination.appendChild(nextButton);
+}
+
+function deleteMessage(index) {
+    if (confirm('Are you sure you want to delete this message?')) {
+        try {
+            const messages = JSON.parse(localStorage.getItem('contactMessages')) || [];
+            messages.splice(index, 1);
+            localStorage.setItem('contactMessages', JSON.stringify(messages));
+            loadMessages();
+            logActivity('messages', `Deleted message #${index + 1}`);
+        } catch (error) {
+            console.error('Error deleting message:', error);
+        }
+    }
+}
+
+function confirmDeleteAll() {
+    if (confirm('Are you sure you want to delete all messages? This action cannot be undone!')) {
+        localStorage.setItem('contactMessages', '[]');
+        loadMessages();
+        logActivity('messages', 'Deleted all messages');
+    }
+}
+
+function toggleMarkMessage(index) {
+    try {
+        const messages = JSON.parse(localStorage.getItem('contactMessages')) || [];
+        messages[index].marked = !messages[index].marked;
+        localStorage.setItem('contactMessages', JSON.stringify(messages));
+        loadMessages();
+        logActivity('messages', `Marked/unmarked message #${index + 1}`);
+    } catch (error) {
+        console.error('Error marking message:', error);
+    }
+}
+
+function applyFiltersAndSearch() {
+    const messages = JSON.parse(localStorage.getItem('contactMessages')) || [];
+    const searchTerm = document.getElementById('searchBox').value.toLowerCase();
+    const filterValue = document.getElementById('filterSelect').value;
+    const today = new Date().toLocaleDateString();
+
+    filteredMessages = messages.filter(msg => {
+        const matchesSearch = 
+            msg.name.toLowerCase().includes(searchTerm) ||
+            msg.email.toLowerCase().includes(searchTerm) ||
+            msg.message.toLowerCase().includes(searchTerm);
+
+        switch (filterValue) {
+            case 'unread':
+                return !msg.read && matchesSearch;
+            case 'marked':
+                return msg.marked && matchesSearch;
+            case 'today':
+                return new Date(msg.date).toLocaleDateString() === today && matchesSearch;
+            default:
+                return matchesSearch;
+        }
+    });
+
+    displayMessages(filteredMessages);
+}
+
+function exportMessages() {
+    try {
+        const messages = JSON.parse(localStorage.getItem('contactMessages')) || [];
+        if (messages.length === 0) {
+            alert('No messages to export!');
+            return;
+        }
+
+        let csv = 'Name,Email,Message,Date,Status\n';
+        messages.forEach(msg => {
+            const status = msg.marked ? 'Marked' : (msg.read ? 'Read' : 'Unread');
+            csv += `"${msg.name}","${msg.email}","${msg.message}","${msg.date}","${status}"\n`;
+        });
+
+        const blob = new Blob([csv], { type: 'text/csv' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `contact_messages_${new Date().toLocaleDateString()}.csv`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+        
+        showNotification('Backup created successfully!', 'success');
+        logActivity('data', 'Exported contact messages');
+    } catch (error) {
+        console.error('Error exporting messages:', error);
+        alert('Error exporting messages. Please try again.');
+    }
+}
+
+// Analytics Functions
+function initializeCharts() {
+    try {
+        const messageCtx = document.getElementById('messageChart');
+        const priorityCtx = document.getElementById('priorityChart');
+
+        if (!messageCtx || !priorityCtx) {
+            console.error('Chart canvas elements not found');
+            return;
+        }
+
+        // Destroy existing charts if they exist
+        if (messageChart) messageChart.destroy();
+        if (priorityChart) priorityChart.destroy();
+
+        messageChart = new Chart(messageCtx, {
+            type: 'line',
+            data: {
+                labels: [],
+                datasets: [{
+                    label: 'Messages per Day',
+                    data: [],
+                    borderColor: '#3498db',
+                    tension: 0.1
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            stepSize: 1
+                        }
+                    }
+                }
+            }
+        });
+
+        priorityChart = new Chart(priorityCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['High', 'Medium', 'Low'],
+                datasets: [{
+                    data: [0, 0, 0],
+                    backgroundColor: ['#e74c3c', '#f1c40f', '#2ecc71']
+                }]
+            },
+            options: {
+                responsive: true
+            }
+        });
+    } catch (error) {
+        console.error('Error initializing charts:', error);
+    }
+}
+
+function updateAnalytics(messages) {
+    try {
+        if (!messageChart || !priorityChart) {
+            console.error('Charts not initialized');
+            return;
+        }
+
+        // Update message chart
+        const last7Days = Array.from({length: 7}, (_, i) => {
+            const d = new Date();
+            d.setDate(d.getDate() - i);
+            return d.toLocaleDateString();
+        }).reverse();
+
+        const messageData = last7Days.map(date => 
+            messages.filter(msg => new Date(msg.date).toLocaleDateString() === date).length
+        );
+
+        messageChart.data.labels = last7Days;
+        messageChart.data.datasets[0].data = messageData;
+        messageChart.update();
+
+        // Update priority chart
+        const priorities = {
+            high: messages.filter(msg => msg.priority === 'high').length,
+            medium: messages.filter(msg => msg.priority === 'medium').length,
+            low: messages.filter(msg => msg.priority === 'low' || !msg.priority).length
+        };
+
+        priorityChart.data.datasets[0].data = [priorities.high, priorities.medium, priorities.low];
+        priorityChart.update();
+
+        // Update other analytics
+        const avgResponseTime = document.getElementById('avgResponseTime');
+        const spamRate = document.getElementById('spamRate');
+        const satisfaction = document.getElementById('satisfaction');
+
+        if (avgResponseTime) avgResponseTime.textContent = calculateAverageResponseTime(messages) + 'h';
+        if (spamRate) spamRate.textContent = calculateSpamRate(messages) + '%';
+        if (satisfaction) satisfaction.textContent = calculateSatisfaction(messages) + '%';
+    } catch (error) {
+        console.error('Error updating analytics:', error);
+    }
+}
+
+// Analytics calculation functions
+function calculateAverageResponseTime(messages) {
+    if (!messages || messages.length === 0) return 0;
+    const responseTimes = messages.filter(m => m.responseTime).map(m => m.responseTime);
+    return responseTimes.length ? Math.round(responseTimes.reduce((a, b) => a + b, 0) / responseTimes.length) : 0;
+}
+
+function calculateSpamRate(messages) {
+    if (!messages || messages.length === 0) return 0;
+    const spamCount = messages.filter(m => m.isSpam).length;
+    return Math.round((spamCount / messages.length) * 100);
+}
+
+function calculateSatisfaction(messages) {
+    if (!messages || messages.length === 0) return 0;
+    const satisfiedCount = messages.filter(m => m.satisfaction === 'positive').length;
+    return Math.round((satisfiedCount / messages.length) * 100);
+}
+
+// Visitor statistics handling
+function loadVisitorStats() {
+    try {
+        const visitors = JSON.parse(localStorage.getItem('visitorData')) || [];
+        updateVisitorStats(visitors);
+        updateVisitorCharts(visitors);
+        displayVisitorList(visitors);
+        updateCountryFilter(visitors);
+    } catch (error) {
+        console.error('Error loading visitor stats:', error);
+        showNotification('Error loading visitor statistics', 'error');
+    }
+}
+
+function updateVisitorStats(visitors) {
+    const today = new Date().toLocaleDateString();
+    
+    // Calculate statistics
+    const totalVisitors = visitors.length;
+    const activeToday = visitors.filter(v => 
+        new Date(v.lastActive).toLocaleDateString() === today
+    ).length;
+    
+    const totalTimeSpent = visitors.reduce((sum, v) => sum + v.timeSpent, 0);
+    const avgTimeSpent = totalVisitors ? Math.floor(totalTimeSpent / totalVisitors) : 0;
+    
+    const totalPageViews = visitors.reduce((sum, v) => {
+        return sum + Object.values(v.pageViews).reduce((a, b) => a + b.count, 0);
+    }, 0);
+    
+    // Update display
+    document.getElementById('totalVisitors').textContent = totalVisitors;
+    document.getElementById('activeToday').textContent = activeToday;
+    document.getElementById('avgTimeSpent').textContent = formatTime(avgTimeSpent);
+    document.getElementById('totalPageViews').textContent = totalPageViews;
+}
+
+function updateVisitorCharts(visitors) {
+    try {
+        updateVisitorTrendChart(visitors);
+        updateDeviceChart(visitors);
+        updateLocationChart(visitors);
+    } catch (error) {
+        console.error('Error updating visitor charts:', error);
+    }
+}
+
+function updateVisitorTrendChart(visitors) {
+    const last7Days = Array.from({length: 7}, (_, i) => {
+        const d = new Date();
+        d.setDate(d.getDate() - i);
+        return d.toLocaleDateString();
+    }).reverse();
+
+    const visitorTrend = last7Days.map(date =>
+        visitors.filter(v => new Date(v.startTime).toLocaleDateString() === date).length
+    );
+
+    if (!visitorChart) {
+        const ctx = document.getElementById('visitorChart');
+        if (ctx) {
+            visitorChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: last7Days,
+                    datasets: [{
+                        label: 'Daily Visitors',
+                        data: visitorTrend,
+                        borderColor: '#3498db',
+                        tension: 0.1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                stepSize: 1
+                            }
+                        }
+                    }
+                }
+            });
+        }
+    } else {
+        visitorChart.data.labels = last7Days;
+        visitorChart.data.datasets[0].data = visitorTrend;
+        visitorChart.update();
+    }
+}
+
+function updateDeviceChart(visitors) {
+    const devices = visitors.reduce((acc, v) => {
+        const device = v.deviceInfo?.device || 'unknown';
+        acc[device] = (acc[device] || 0) + 1;
+        return acc;
+    }, {});
+
+    if (!deviceChart) {
+        const ctx = document.getElementById('deviceChart');
+        if (ctx) {
+            deviceChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: Object.keys(devices),
+                    datasets: [{
+                        data: Object.values(devices),
+                        backgroundColor: ['#2ecc71', '#3498db', '#9b59b6', '#f1c40f']
+                    }]
+                },
+                options: {
+                    responsive: true
+                }
+            });
+        }
+    } else {
+        deviceChart.data.labels = Object.keys(devices);
+        deviceChart.data.datasets[0].data = Object.values(devices);
+        deviceChart.update();
+    }
+}
+
+function updateLocationChart(visitors) {
+    const locations = visitors.reduce((acc, v) => {
+        const country = v.location?.country || 'Unknown';
+        acc[country] = (acc[country] || 0) + 1;
+        return acc;
+    }, {});
+
+    if (!locationChart) {
+        const ctx = document.getElementById('locationChart');
+        if (ctx) {
+            locationChart = new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: Object.keys(locations),
+                    datasets: [{
+                        data: Object.values(locations),
+                        backgroundColor: ['#e74c3c', '#2ecc71', '#3498db', '#f1c40f', '#9b59b6']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Visitor Locations'
+                        }
+                    }
+                }
+            });
+        }
+    } else {
+        locationChart.data.labels = Object.keys(locations);
+        locationChart.data.datasets[0].data = Object.values(locations);
+        locationChart.update();
+    }
+}
+
+function displayVisitorList(visitors) {
+    const visitorList = document.getElementById('visitorList');
+    if (!visitorList) return;
+
+    // Apply filters
+    const searchTerm = document.getElementById('visitorSearch').value.toLowerCase();
+    const deviceFilter = document.getElementById('deviceFilter').value;
+    const countryFilter = document.getElementById('countryFilter').value;
+
+    const filteredVisitors = visitors.filter(visitor => {
+        const matchesSearch = visitor.visitorId.toLowerCase().includes(searchTerm) ||
+                            (visitor.ipAddress && visitor.ipAddress.includes(searchTerm)) ||
+                            (visitor.location?.country || '').toLowerCase().includes(searchTerm);
+        const matchesDevice = !deviceFilter || visitor.deviceInfo?.device === deviceFilter;
+        const matchesCountry = !countryFilter || visitor.location?.country === countryFilter;
+        return matchesSearch && matchesDevice && matchesCountry;
+    });
+
+    // Sort visitors by last active time (most recent first)
+    const sortedVisitors = [...filteredVisitors].sort((a, b) => 
+        new Date(b.lastActive) - new Date(a.lastActive)
+    );
+
+    visitorList.innerHTML = sortedVisitors.map(visitor => `
+        <tr>
+            <td>${visitor.visitorId}</td>
+            <td>${visitor.ipAddress || 'Unknown'}</td>
+            <td>${formatLocation(visitor.location)}</td>
+            <td>${new Date(visitor.startTime).toLocaleString()}</td>
+            <td>${formatTime(visitor.timeSpent)}</td>
+            <td>${Object.values(visitor.pageViews).reduce((sum, page) => sum + page.count, 0)}</td>
+            <td>${visitor.deviceInfo?.device || 'Unknown'}</td>
+            <td>${visitor.deviceInfo?.browser || 'Unknown'}</td>
+            <td>${visitor.deviceInfo?.os || 'Unknown'}</td>
+            <td>${visitor.deviceInfo?.screenResolution || 'Unknown'}</td>
+            <td>
+                <button onclick="showVisitorDetails('${visitor.visitorId}')" class="btn-info">
+                    <i class="fas fa-info-circle"></i>
                 </button>
-                <button onclick="confirmDeleteAll()" class="action-btn delete-all">
-                    <i class="fas fa-trash"></i> Delete All
-                </button>
-            </div>
+            </td>
+        </tr>
+    `).join('');
+}
 
-            <div id="messageList">
-                <!-- Messages will be loaded here -->
-            </div>
+function formatLocation(location) {
+    if (!location) return 'Unknown';
+    return `${location.city || ''}, ${location.country || 'Unknown'}`;
+}
 
-            <div class="pagination" id="pagination">
-                <!-- Pagination buttons -->
-            </div>
-        </div>
+function showVisitorDetails(visitorId) {
+    const visitors = JSON.parse(localStorage.getItem('visitorData')) || [];
+    const visitor = visitors.find(v => v.visitorId === visitorId);
+    if (!visitor) return;
 
-        <!-- Analytics Section -->
-        <div id="analyticsSection" class="dashboard-section">
-            <div class="header">
-                <h1><i class="fas fa-chart-bar"></i> Analytics</h1>
-            </div>
-            <div class="chart-container">
-                <div class="chart">
-                    <canvas id="messageChart"></canvas>
-                </div>
-                <div class="chart">
-                    <canvas id="priorityChart"></canvas>
-                </div>
-            </div>
-            <div class="stats">
-                <div class="stat-card">
-                    <h3>Average Response Time</h3>
-                    <div id="avgResponseTime" class="number">0h</div>
-                </div>
-                <div class="stat-card">
-                    <h3>Spam Detection Rate</h3>
-                    <div id="spamRate" class="number">0%</div>
-                </div>
-                <div class="stat-card">
-                    <h3>User Satisfaction</h3>
-                    <div id="satisfaction" class="number">0%</div>
-                </div>
-            </div>
-        </div>
+    const modal = document.getElementById('visitorModal');
+    
+    // Update basic info
+    document.getElementById('basicInfo').innerHTML = `
+        <p><strong>Visitor ID:</strong> ${visitor.visitorId}</p>
+        <p><strong>IP Address:</strong> ${visitor.ipAddress || 'Unknown'}</p>
+        <p><strong>First Visit:</strong> ${new Date(visitor.startTime).toLocaleString()}</p>
+        <p><strong>Last Active:</strong> ${new Date(visitor.lastActive).toLocaleString()}</p>
+        <p><strong>Time Spent:</strong> ${formatTime(visitor.timeSpent)}</p>
+    `;
 
-        <!-- Visitors Section -->
-        <div id="visitorsSection" class="dashboard-section">
-            <div class="header">
-                <h1><i class="fas fa-users"></i> Website Visitors</h1>
-            </div>
+    // Update device info
+    document.getElementById('deviceInfo').innerHTML = `
+        <p><strong>Device Type:</strong> ${visitor.deviceInfo?.device || 'Unknown'}</p>
+        <p><strong>Browser:</strong> ${visitor.deviceInfo?.browser || 'Unknown'}</p>
+        <p><strong>OS:</strong> ${visitor.deviceInfo?.os || 'Unknown'}</p>
+        <p><strong>Screen:</strong> ${visitor.deviceInfo?.screenResolution || 'Unknown'}</p>
+        <p><strong>Language:</strong> ${visitor.deviceInfo?.language || 'Unknown'}</p>
+        <p><strong>Timezone:</strong> ${visitor.deviceInfo?.timezone || 'Unknown'}</p>
+    `;
+
+    // Update location info
+    document.getElementById('locationInfo').innerHTML = visitor.location ? `
+        <p><strong>Country:</strong> ${visitor.location.country || 'Unknown'}</p>
+        <p><strong>Region:</strong> ${visitor.location.region || 'Unknown'}</p>
+        <p><strong>City:</strong> ${visitor.location.city || 'Unknown'}</p>
+        <p><strong>Coordinates:</strong> ${visitor.location.latitude}, ${visitor.location.longitude}</p>
+    ` : 'Location information not available';
+
+    // Update page view info
+    document.getElementById('pageViewInfo').innerHTML = `
+        <table class="detail-table">
+            <tr>
+                <th>Page</th>
+                <th>Views</th>
+                <th>First Visit</th>
+                <th>Last Visit</th>
+            </tr>
+            ${Object.entries(visitor.pageViews).map(([page, data]) => `
+                <tr>
+                    <td>${page || '/'}</td>
+                    <td>${data.count}</td>
+                    <td>${new Date(data.firstVisit).toLocaleString()}</td>
+                    <td>${new Date(data.lastVisit).toLocaleString()}</td>
+                </tr>
+            `).join('')}
+        </table>
+    `;
+
+    // Update interaction info
+    document.getElementById('interactionInfo').innerHTML = visitor.interactions ? `
+        <p><strong>Clicks:</strong> ${visitor.interactions.clicks}</p>
+        <p><strong>Mouse Moves:</strong> ${visitor.interactions.mouseMoves}</p>
+        <p><strong>Keystrokes:</strong> ${visitor.interactions.keystrokes}</p>
+        <p><strong>Scrolls:</strong> ${visitor.interactions.scrolls}</p>
+        <p><strong>Last Activity:</strong> ${new Date(visitor.interactions.lastActivity).toLocaleString()}</p>
+    ` : 'Interaction data not available';
+
+    // Update performance info
+    document.getElementById('performanceInfo').innerHTML = visitor.performance ? `
+        <p><strong>Page Load Time:</strong> ${visitor.performance.pageLoadTime}ms</p>
+        <p><strong>DNS Time:</strong> ${visitor.performance.dnsTime}ms</p>
+        <p><strong>Server Response Time:</strong> ${visitor.performance.serverResponseTime}ms</p>
+        <p><strong>DOM Load Time:</strong> ${visitor.performance.domLoadTime}ms</p>
+    ` : 'Performance data not available';
+
+    modal.style.display = 'block';
+}
+
+function updateCountryFilter(visitors) {
+    const countryFilter = document.getElementById('countryFilter');
+    const countries = [...new Set(visitors
+        .map(v => v.location?.country)
+        .filter(country => country)
+    )].sort();
+
+    countryFilter.innerHTML = `
+        <option value="">All Countries</option>
+        ${countries.map(country => `
+            <option value="${country}">${country}</option>
+        `).join('')}
+    `;
+}
+
+// Add event listeners for filters
+document.getElementById('visitorSearch')?.addEventListener('input', () => {
+    const visitors = JSON.parse(localStorage.getItem('visitorData')) || [];
+    displayVisitorList(visitors);
+});
+
+document.getElementById('deviceFilter')?.addEventListener('change', () => {
+    const visitors = JSON.parse(localStorage.getItem('visitorData')) || [];
+    displayVisitorList(visitors);
+});
+
+document.getElementById('countryFilter')?.addEventListener('change', () => {
+    const visitors = JSON.parse(localStorage.getItem('visitorData')) || [];
+    displayVisitorList(visitors);
+});
+
+// Modal close button
+document.querySelector('.close')?.addEventListener('click', () => {
+    document.getElementById('visitorModal').style.display = 'none';
+});
+
+window.onclick = function(event) {
+    const modal = document.getElementById('visitorModal');
+    if (event.target === modal) {
+        modal.style.display = 'none';
+    }
+}
+
+// Settings Management Functions
+function loadSettings() {
+    const settings = JSON.parse(localStorage.getItem('adminSettings')) || getDefaultSettings();
+    
+    // Load Account Settings
+    document.getElementById('adminUsername').value = settings.account.username || '';
+    
+    // Load Notification Settings
+    document.getElementById('notificationEmail').value = settings.notifications.email || '';
+    document.getElementById('emailNotifications').checked = settings.notifications.emailEnabled;
+    document.getElementById('browserNotifications').checked = settings.notifications.browserEnabled;
+    
+    // Load Message Settings
+    document.getElementById('messageRetention').value = settings.messages.retentionDays;
+    document.getElementById('autoDeleteSpam').checked = settings.messages.autoDeleteSpam;
+    document.getElementById('autoArchive').checked = settings.messages.autoArchive;
+    
+    // Load Analytics Settings
+    document.getElementById('trackVisitors').checked = settings.analytics.trackVisitors;
+    document.getElementById('collectDeviceInfo').checked = settings.analytics.collectDeviceInfo;
+    document.getElementById('analyticsRetention').value = settings.analytics.retentionDays;
+}
+
+function getDefaultSettings() {
+    return {
+        account: {
+            username: 'admin'
+        },
+        notifications: {
+            email: '',
+            emailEnabled: false,
+            browserEnabled: true
+        },
+        messages: {
+            retentionDays: 90,
+            autoDeleteSpam: true,
+            autoArchive: false
+        },
+        analytics: {
+            trackVisitors: true,
+            collectDeviceInfo: true,
+            retentionDays: 90
+        }
+    };
+}
+
+function updateAdminCredentials() {
+    const username = document.getElementById('adminUsername').value.trim();
+    const password = document.getElementById('adminPassword').value.trim();
+    
+    if (!username || !password) {
+        showNotification('Please enter both username and password', 'error');
+        return;
+    }
+
+    if (username.length < 3 || password.length < 6) {
+        showNotification('Username must be at least 3 characters and password at least 6 characters', 'error');
+        return;
+    }
+    
+    // Update credentials in memory and storage
+    ADMIN_CREDENTIALS.username = username;
+    ADMIN_CREDENTIALS.password = password;
+    localStorage.setItem('adminCredentials', JSON.stringify(ADMIN_CREDENTIALS));
+    
+    // Clear the password field
+    document.getElementById('adminUsername').value = '';
+    document.getElementById('adminPassword').value = '';
+    
+    showNotification('Admin credentials updated successfully! Please remember your new login details.', 'success');
+    logActivity('settings', 'Admin credentials updated');
+}
+
+function updateNotificationSettings() {
+    const email = document.getElementById('notificationEmail').value;
+    const emailEnabled = document.getElementById('emailNotifications').checked;
+    const browserEnabled = document.getElementById('browserNotifications').checked;
+    
+    if (emailEnabled && !email) {
+        showNotification('Please enter an email address for notifications', 'error');
+        return;
+    }
+    
+    const settings = JSON.parse(localStorage.getItem('adminSettings')) || getDefaultSettings();
+    settings.notifications = {
+        email,
+        emailEnabled,
+        browserEnabled
+    };
+    
+    localStorage.setItem('adminSettings', JSON.stringify(settings));
+    showNotification('Notification settings updated successfully', 'success');
+    
+    if (browserEnabled) {
+        requestBrowserNotificationPermission();
+    }
+}
+
+function updateMessageSettings() {
+    const retentionDays = document.getElementById('messageRetention').value;
+    const autoDeleteSpam = document.getElementById('autoDeleteSpam').checked;
+    const autoArchive = document.getElementById('autoArchive').checked;
+    
+    const settings = JSON.parse(localStorage.getItem('adminSettings')) || getDefaultSettings();
+    settings.messages = {
+        retentionDays,
+        autoDeleteSpam,
+        autoArchive
+    };
+    
+    localStorage.setItem('adminSettings', JSON.stringify(settings));
+    showNotification('Message settings updated successfully', 'success');
+    
+    // Apply message retention policy
+    if (autoDeleteSpam || autoArchive) {
+        applyMessageRetentionPolicy();
+    }
+}
+
+function updateAnalyticsSettings() {
+    const trackVisitors = document.getElementById('trackVisitors').checked;
+    const collectDeviceInfo = document.getElementById('collectDeviceInfo').checked;
+    const retentionDays = document.getElementById('analyticsRetention').value;
+    
+    const settings = JSON.parse(localStorage.getItem('adminSettings')) || getDefaultSettings();
+    settings.analytics = {
+        trackVisitors,
+        collectDeviceInfo,
+        retentionDays
+    };
+    
+    localStorage.setItem('adminSettings', JSON.stringify(settings));
+    showNotification('Analytics settings updated successfully', 'success');
+    
+    // Apply analytics retention policy
+    applyAnalyticsRetentionPolicy();
+}
+
+function applyMessageRetentionPolicy() {
+    const settings = JSON.parse(localStorage.getItem('adminSettings')) || getDefaultSettings();
+    const messages = JSON.parse(localStorage.getItem('contactMessages')) || [];
+    const retentionDate = new Date();
+    retentionDate.setDate(retentionDate.getDate() - settings.messages.retentionDays);
+    
+    const filteredMessages = messages.filter(message => {
+        const messageDate = new Date(message.date);
+        if (settings.messages.autoDeleteSpam && message.isSpam) {
+            return false;
+        }
+        if (settings.messages.autoArchive && messageDate < retentionDate) {
+            return false;
+        }
+        return true;
+    });
+    
+    localStorage.setItem('contactMessages', JSON.stringify(filteredMessages));
+    loadMessages();
+}
+
+function applyAnalyticsRetentionPolicy() {
+    const settings = JSON.parse(localStorage.getItem('adminSettings')) || getDefaultSettings();
+    const visitors = JSON.parse(localStorage.getItem('visitorData')) || [];
+    const retentionDate = new Date();
+    retentionDate.setDate(retentionDate.getDate() - settings.analytics.retentionDays);
+    
+    const filteredVisitors = visitors.filter(visitor => {
+        const visitDate = new Date(visitor.lastActive);
+        return visitDate >= retentionDate;
+    });
+    
+    localStorage.setItem('visitorData', JSON.stringify(filteredVisitors));
+    loadVisitorStats();
+}
+
+function requestBrowserNotificationPermission() {
+    if ('Notification' in window) {
+        Notification.requestPermission().then(permission => {
+            if (permission === 'granted') {
+                showNotification('Browser notifications enabled', 'success');
+            } else {
+                document.getElementById('browserNotifications').checked = false;
+                showNotification('Browser notification permission denied', 'error');
+            }
+        });
+    } else {
+        document.getElementById('browserNotifications').checked = false;
+        showNotification('Browser notifications not supported', 'error');
+    }
+}
+
+// Backup Functions
+function createBackup() {
+    try {
+        const backup = {
+            timestamp: new Date().toISOString(),
+            contactMessages: JSON.parse(localStorage.getItem('contactMessages') || '[]'),
+            visitorData: JSON.parse(localStorage.getItem('visitorData') || '[]'),
+            adminSettings: JSON.parse(localStorage.getItem('adminSettings') || '{}'),
+            analyticsData: JSON.parse(localStorage.getItem('analyticsData') || '{}')
+        };
+
+        // Create backup file
+        const backupStr = JSON.stringify(backup, null, 2);
+        const blob = new Blob([backupStr], { type: 'application/json' });
+        const url = window.URL.createObjectURL(blob);
+        
+        // Create download link
+        const a = document.createElement('a');
+        const date = new Date().toISOString().split('T')[0];
+        a.href = url;
+        a.download = `admin_backup_${date}.json`;
+        document.body.appendChild(a);
+        a.click();
+        
+        // Cleanup
+        setTimeout(() => {
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }, 0);
+
+        showNotification('Backup created successfully', 'success');
+        logActivity('data', 'Created backup');
+    } catch (error) {
+        console.error('Error creating backup:', error);
+        showNotification('Error creating backup. Please try again.', 'error');
+    }
+}
+
+function restoreBackup() {
+    try {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = '.json';
+        
+        input.onchange = function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
             
-            <div class="stats">
-                <div class="stat-card">
-                    <h3>Total Visitors</h3>
-                    <div id="totalVisitors" class="number">0</div>
-                </div>
-                <div class="stat-card">
-                    <h3>Active Today</h3>
-                    <div id="activeToday" class="number">0</div>
-                </div>
-                <div class="stat-card">
-                    <h3>Average Time Spent</h3>
-                    <div id="avgTimeSpent" class="number">0m</div>
-                </div>
-                <div class="stat-card">
-                    <h3>Total Page Views</h3>
-                    <div id="totalPageViews" class="number">0</div>
-                </div>
-            </div>
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const backup = JSON.parse(e.target.result);
+                    
+                    // Validate backup data
+                    if (!backup.timestamp || !backup.contactMessages) {
+                        throw new Error('Invalid backup file format');
+                    }
+                    
+                    // Restore data
+                    localStorage.setItem('contactMessages', JSON.stringify(backup.contactMessages));
+                    if (backup.visitorData) localStorage.setItem('visitorData', JSON.stringify(backup.visitorData));
+                    if (backup.adminSettings) localStorage.setItem('adminSettings', JSON.stringify(backup.adminSettings));
+                    if (backup.analyticsData) localStorage.setItem('analyticsData', JSON.stringify(backup.analyticsData));
+                    
+                    showNotification('Backup restored successfully', 'success');
+                    setTimeout(() => window.location.reload(), 1500);
+                    logActivity('data', 'Restored backup');
+                } catch (error) {
+                    console.error('Error parsing backup:', error);
+                    showNotification('Invalid backup file. Please try again.', 'error');
+                }
+            };
+            reader.readAsText(file);
+        };
+        
+        input.click();
+    } catch (error) {
+        console.error('Error restoring backup:', error);
+        showNotification('Error restoring backup. Please try again.', 'error');
+    }
+}
 
-            <div class="chart-container">
-                <div class="chart">
-                    <canvas id="visitorChart"></canvas>
-                </div>
-                <div class="chart">
-                    <canvas id="deviceChart"></canvas>
-                </div>
-                <div class="chart">
-                    <canvas id="locationChart"></canvas>
-                </div>
-            </div>
+// Data Management Functions
+function clearAllData() {
+    if (confirm('Are you sure you want to clear all data? This action cannot be undone.')) {
+        // Clear all localStorage data
+        localStorage.clear();
 
-            <div class="visitor-list-container">
-                <h2>Recent Visitors</h2>
-                <div class="table-filters">
-                    <input type="text" id="visitorSearch" placeholder="Search visitors..." class="search-input">
-                    <select id="deviceFilter" class="filter-select">
-                        <option value="">All Devices</option>
-                        <option value="desktop">Desktop</option>
-                        <option value="mobile">Mobile</option>
-                        <option value="tablet">Tablet</option>
-                    </select>
-                    <select id="countryFilter" class="filter-select">
-                        <option value="">All Countries</option>
-                    </select>
-                </div>
-                <div class="table-wrapper">
-                    <table class="visitor-table">
-                        <thead>
-                            <tr>
-                                <th>Visitor ID</th>
-                                <th>IP Address</th>
-                                <th>Location</th>
-                                <th>Visit Time</th>
-                                <th>Time Spent</th>
-                                <th>Pages Viewed</th>
-                                <th>Device Info</th>
-                                <th>Browser</th>
-                                <th>OS</th>
-                                <th>Screen</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="visitorList">
-                            <!-- Visitor data will be loaded here -->
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+        // Reset admin credentials to default
+        ADMIN_CREDENTIALS = {
+            username: 'admin',
+            password: 'admin123'
+        };
 
-            <!-- Visitor Details Modal -->
-            <div id="visitorModal" class="modal">
-                <div class="modal-content">
-                    <span class="close">&times;</span>
-                    <h2>Visitor Details</h2>
-                    <div class="visitor-details">
-                        <div class="detail-section">
-                            <h3>Basic Information</h3>
-                            <div id="basicInfo"></div>
-                        </div>
-                        <div class="detail-section">
-                            <h3>Device Information</h3>
-                            <div id="deviceInfo"></div>
-                        </div>
-                        <div class="detail-section">
-                            <h3>Location Information</h3>
-                            <div id="locationInfo"></div>
-                        </div>
-                        <div class="detail-section">
-                            <h3>Page Views</h3>
-                            <div id="pageViewInfo"></div>
-                        </div>
-                        <div class="detail-section">
-                            <h3>User Interactions</h3>
-                            <div id="interactionInfo"></div>
-                        </div>
-                        <div class="detail-section">
-                            <h3>Performance Metrics</h3>
-                            <div id="performanceInfo"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+        // Clear input fields if they exist
+        const usernameInput = document.getElementById('adminUsername');
+        const passwordInput = document.getElementById('adminPassword');
+        if (usernameInput) usernameInput.value = '';
+        if (passwordInput) passwordInput.value = '';
 
-        <!-- Settings Section -->
-        <div id="settingsSection" class="dashboard-section">
-            <div class="header">
-                <h1><i class="fas fa-cog"></i> Settings</h1>
-            </div>
-            <div class="settings-grid">
-                <div class="settings-card">
-                    <h3>Account Settings</h3>
-                    <div class="settings-form">
-                        <div>
-                            <label for="adminUsername">Admin Username</label>
-                            <input type="text" id="adminUsername" placeholder="Enter new username">
-                        </div>
-                        <div>
-                            <label for="adminPassword">Admin Password</label>
-                            <input type="password" id="adminPassword" placeholder="Enter new password">
-                        </div>
-                        <button onclick="updateAdminCredentials()" class="action-btn">
-                            Update Credentials
-                        </button>
-                    </div>
-                </div>
+        // Reinitialize necessary data structures
+        currentPage = 1;
+        localStorage.setItem('messages', JSON.stringify([]));
+        localStorage.setItem('visitorData', JSON.stringify([]));
+        localStorage.setItem('adminSettings', JSON.stringify(getDefaultSettings()));
 
-                <div class="settings-card">
-                    <h3>Notification Settings</h3>
-                    <div class="settings-form">
-                        <div>
-                            <label for="notificationEmail">Notification Email</label>
-                            <input type="email" id="notificationEmail" placeholder="Enter email for notifications">
-                        </div>
-                        <div class="checkbox-group">
-                            <input type="checkbox" id="emailNotifications">
-                            <label for="emailNotifications">Enable Email Notifications</label>
-                        </div>
-                        <div class="checkbox-group">
-                            <input type="checkbox" id="browserNotifications">
-                            <label for="browserNotifications">Enable Browser Notifications</label>
-                        </div>
-                        <button onclick="updateNotificationSettings()" class="action-btn">
-                            Save Notification Settings
-                        </button>
-                    </div>
-                </div>
+        // Reset UI
+        loadMessages();
+        loadVisitorStats();
+        loadSettings();
+        updateAnalytics([]);
+        
+        showNotification('All data has been cleared and settings reset to default', 'success');
+        logActivity('data', 'Cleared all data');
+        
+        // Optional: Redirect to login page after clearing data
+        setTimeout(() => {
+            document.getElementById('loginForm').style.display = 'block';
+            document.getElementById('adminContent').style.display = 'none';
+        }, 1500);
+    }
+}
 
-                <div class="settings-card">
-                    <h3>Message Settings</h3>
-                    <div class="settings-form">
-                        <div>
-                            <label for="messageRetention">Message Retention Period</label>
-                            <select id="messageRetention">
-                                <option value="30">30 days</option>
-                                <option value="60">60 days</option>
-                                <option value="90">90 days</option>
-                                <option value="180">180 days</option>
-                                <option value="365">1 year</option>
-                            </select>
-                        </div>
-                        <div class="checkbox-group">
-                            <input type="checkbox" id="autoDeleteSpam">
-                            <label for="autoDeleteSpam">Auto-delete Spam Messages</label>
-                        </div>
-                        <div class="checkbox-group">
-                            <input type="checkbox" id="autoArchive">
-                            <label for="autoArchive">Auto-archive Old Messages</label>
-                        </div>
-                        <button onclick="updateMessageSettings()" class="action-btn">
-                            Save Message Settings
-                        </button>
-                    </div>
-                </div>
+// Utility Functions
+function formatTime(seconds) {
+    if (!seconds) return '0s';
+    if (seconds < 60) return `${seconds}s`;
+    const minutes = Math.floor(seconds / 60);
+    if (minutes < 60) return `${minutes}m`;
+    const hours = Math.floor(minutes / 60);
+    const remainingMinutes = minutes % 60;
+    return `${hours}h ${remainingMinutes}m`;
+}
 
-                <div class="settings-card">
-                    <h3>Analytics Settings</h3>
-                    <div class="settings-form">
-                        <div class="checkbox-group">
-                            <input type="checkbox" id="trackVisitors">
-                            <label for="trackVisitors">Track Website Visitors</label>
-                        </div>
-                        <div class="checkbox-group">
-                            <input type="checkbox" id="collectDeviceInfo">
-                            <label for="collectDeviceInfo">Collect Device Information</label>
-                        </div>
-                        <div>
-                            <label for="analyticsRetention">Analytics Data Retention</label>
-                            <select id="analyticsRetention">
-                                <option value="30">30 days</option>
-                                <option value="90">90 days</option>
-                                <option value="180">180 days</option>
-                                <option value="365">1 year</option>
-                            </select>
-                        </div>
-                        <button onclick="updateAnalyticsSettings()" class="action-btn">
-                            Save Analytics Settings
-                        </button>
-                    </div>
-                </div>
+function showNotification(message, type = 'info') {
+    const notification = document.getElementById('notification');
+    if (notification) {
+        notification.textContent = message;
+        notification.className = `notification ${type}`;
+        notification.style.display = 'block';
+        setTimeout(() => {
+            notification.style.display = 'none';
+        }, 3000);
+    }
+}
 
-                <div class="settings-card">
-                    <h3>Data Management</h3>
-                    <div class="settings-form">
-                        <div class="form-group">
-                            <button onclick="clearAllData()" class="action-btn danger-btn">
-                                <i class="fas fa-trash"></i> Clear All Data
-                            </button>
-                            <p class="help-text">Warning: This will permanently delete all messages, visitor data, and settings.</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+// Performance Calculation Functions
+function calculateAverageTimeOnSite(visitors) {
+    if (!visitors || visitors.length === 0) return 0;
+    
+    const validVisitors = visitors.filter(v => v.timeSpent && v.timeSpent > 0);
+    if (validVisitors.length === 0) return 0;
+    
+    const totalTime = validVisitors.reduce((sum, v) => sum + v.timeSpent, 0);
+    return Math.round(totalTime / validVisitors.length);
+}
 
-        <!-- Backup Section -->
-        <div id="backupSection" class="dashboard-section">
-            <div class="header">
-                <h1><i class="fas fa-database"></i> Backup & Restore</h1>
-            </div>
-            <div class="backup-section">
-                <div class="settings-card">
-                    <h2><i class="fas fa-download"></i> Create Backup</h2>
-                    <p>Download a backup of all your admin panel data including messages, visitor data, and settings.</p>
-                    <button onclick="createBackup()" class="action-btn">
-                        <i class="fas fa-download"></i> Download Backup
-                    </button>
-                </div>
-                
-                <div class="settings-card">
-                    <h2><i class="fas fa-upload"></i> Restore Backup</h2>
-                    <p>Restore your admin panel data from a previously created backup file.</p>
-                    <button onclick="restoreBackup()" class="action-btn">
-                        <i class="fas fa-upload"></i> Upload Backup File
-                    </button>
-                </div>
-            </div>
-        </div>
+function calculateBounceRate(visitors) {
+    if (!visitors || visitors.length === 0) return '0%';
+    
+    const bounceThreshold = 10; // 10 seconds threshold for bounce
+    const bouncedVisitors = visitors.filter(v => !v.timeSpent || v.timeSpent < bounceThreshold);
+    const bounceRate = (bouncedVisitors.length / visitors.length) * 100;
+    
+    return bounceRate.toFixed(1) + '%';
+}
 
-        <!-- Activity Log Section -->
-        <div id="activitySection" class="dashboard-section">
-            <div class="header">
-                <h1><i class="fas fa-history"></i> Activity Log</h1>
-                <div class="header-actions">
-                    <button onclick="clearActivityLog()" class="action-btn danger-btn">
-                        <i class="fas fa-trash"></i> Clear Log
-                    </button>
-                    <button onclick="exportActivityLog()" class="action-btn">
-                        <i class="fas fa-download"></i> Export Log
-                    </button>
-                </div>
-            </div>
-            <div class="activity-filters">
-                <select id="activityType" onchange="filterActivityLog()">
-                    <option value="all">All Activities</option>
-                    <option value="login">Login Events</option>
-                    <option value="settings">Settings Changes</option>
-                    <option value="messages">Message Actions</option>
-                    <option value="data">Data Management</option>
-                </select>
-                <input type="date" id="activityDate" onchange="filterActivityLog()">
-            </div>
-            <div id="activityLog" class="activity-list"></div>
-        </div>
+function calculateSpamRate(messages) {
+    if (!messages || messages.length === 0) return '0%';
+    
+    const spamMessages = messages.filter(m => m.isSpam);
+    const spamRate = (spamMessages.length / messages.length) * 100;
+    
+    return spamRate.toFixed(1) + '%';
+}
 
-        <!-- Reports Section -->
-        <div id="reportsSection" class="dashboard-section">
-            <div class="header">
-                <h1><i class="fas fa-file-alt"></i> Reports</h1>
+function calculateAverageResponseTime(messages) {
+    if (!messages || messages.length === 0) return '0';
+    
+    const respondedMessages = messages.filter(m => m.responseTime);
+    if (respondedMessages.length === 0) return '0';
+    
+    const totalResponseTime = respondedMessages.reduce((sum, m) => sum + m.responseTime, 0);
+    const averageTime = Math.round(totalResponseTime / respondedMessages.length);
+    
+    return formatTime(averageTime);
+}
+
+// Update performance metrics calculation
+function calculatePerformanceMetrics() {
+    const messages = JSON.parse(localStorage.getItem('contactMessages')) || [];
+    const visitors = JSON.parse(localStorage.getItem('visitorData')) || [];
+    
+    const today = new Date().toISOString().split('T')[0];
+    const todayVisitors = visitors.filter(v => v.timestamp?.startsWith(today));
+    const todayMessages = messages.filter(m => m.date?.startsWith(today));
+    
+    return {
+        'Total Messages': messages.length,
+        'Messages Today': todayMessages.length,
+        'Spam Rate': calculateSpamRate(messages),
+        'Average Response Time': calculateAverageResponseTime(messages),
+        'Total Visitors': visitors.length,
+        'Visitors Today': todayVisitors.length,
+        'Average Time on Site': formatTime(calculateAverageTimeOnSite(visitors)),
+        'Bounce Rate': calculateBounceRate(visitors),
+        'Top Countries': getTopCountries(visitors),
+        'Top Browsers': getTopBrowsers(visitors)
+    };
+}
+
+function getTopCountries(visitors, limit = 3) {
+    if (!visitors || visitors.length === 0) return 'None';
+    
+    const countries = visitors.reduce((acc, v) => {
+        const country = v.location?.country || 'Unknown';
+        acc[country] = (acc[country] || 0) + 1;
+        return acc;
+    }, {});
+    
+    return Object.entries(countries)
+        .sort(([,a], [,b]) => b - a)
+        .slice(0, limit)
+        .map(([country, count]) => `${country} (${count})`)
+        .join(', ') || 'None';
+}
+
+function getTopBrowsers(visitors, limit = 3) {
+    if (!visitors || visitors.length === 0) return 'None';
+    
+    const browsers = visitors.reduce((acc, v) => {
+        const browser = v.browser?.name || 'Unknown';
+        acc[browser] = (acc[browser] || 0) + 1;
+        return acc;
+    }, {});
+    
+    return Object.entries(browsers)
+        .sort(([,a], [,b]) => b - a)
+        .slice(0, limit)
+        .map(([browser, count]) => `${browser} (${count})`)
+        .join(', ') || 'None';
+}
+
+// Add styles for spam messages
+const spamStyles = `
+    .message-item.spam {
+        background-color: #fff5f5;
+        border-left: 4px solid #dc3545;
+    }
+    .spam-badge {
+        background-color: #dc3545;
+        color: white;
+        padding: 2px 8px;
+        border-radius: 4px;
+        margin-left: 10px;
+        font-size: 0.8em;
+    }
+    .action-btn.active {
+        background-color: #dc3545;
+        color: white;
+    }
+`;
+
+// Add spam styles to existing styles
+const spamStyleSheet = document.createElement('style');
+spamStyleSheet.textContent = spamStyles;
+document.head.appendChild(spamStyleSheet);
+
+// Activity Log Functions
+function logActivity(type, description) {
+    const activities = JSON.parse(localStorage.getItem('activityLog')) || [];
+    activities.unshift({
+        type,
+        description,
+        timestamp: new Date().toISOString(),
+        user: ADMIN_CREDENTIALS.username
+    });
+    localStorage.setItem('activityLog', JSON.stringify(activities));
+    updateActivityLog();
+}
+
+function updateActivityLog() {
+    const activities = JSON.parse(localStorage.getItem('activityLog')) || [];
+    const activityLog = document.getElementById('activityLog');
+    const selectedType = document.getElementById('activityType').value;
+    const selectedDate = document.getElementById('activityDate').value;
+
+    let filteredActivities = activities;
+    
+    // Apply type filter
+    if (selectedType !== 'all') {
+        filteredActivities = filteredActivities.filter(a => a.type === selectedType);
+    }
+    
+    // Apply date filter
+    if (selectedDate) {
+        const dateStr = new Date(selectedDate).toDateString();
+        filteredActivities = filteredActivities.filter(a => 
+            new Date(a.timestamp).toDateString() === dateStr
+        );
+    }
+
+    activityLog.innerHTML = filteredActivities.map(activity => `
+        <div class="activity-item">
+            <div class="activity-icon ${activity.type}">
+                <i class="fas ${getActivityIcon(activity.type)}"></i>
             </div>
-            <div class="reports-grid">
-                <div class="report-card">
-                    <h3>Message Analytics</h3>
-                    <div class="report-actions">
-                        <button onclick="generateReport('messages')" class="action-btn">
-                            <i class="fas fa-file-export"></i> Generate Report
-                        </button>
-                    </div>
-                </div>
-                <div class="report-card">
-                    <h3>Visitor Statistics</h3>
-                    <div class="report-actions">
-                        <button onclick="generateReport('visitors')" class="action-btn">
-                            <i class="fas fa-file-export"></i> Generate Report
-                        </button>
-                    </div>
-                </div>
-                <div class="report-card">
-                    <h3>Performance Metrics</h3>
-                    <div class="report-actions">
-                        <button onclick="generateReport('performance')" class="action-btn">
-                            <i class="fas fa-file-export"></i> Generate Report
-                        </button>
-                    </div>
-                </div>
-                <div class="report-card">
-                    <h3>Custom Report</h3>
-                    <div class="report-form">
-                        <div class="form-group">
-                            <label>Date Range</label>
-                            <input type="date" id="reportStartDate">
-                            <input type="date" id="reportEndDate">
-                        </div>
-                        <div class="form-group">
-                            <label>Metrics</label>
-                            <div class="checkbox-group">
-                                <label><input type="checkbox" value="messages"> Messages</label>
-                                <label><input type="checkbox" value="visitors"> Visitors</label>
-                                <label><input type="checkbox" value="performance"> Performance</label>
-                            </div>
-                        </div>
-                        <button onclick="generateCustomReport()" class="action-btn">
-                            <i class="fas fa-file-export"></i> Generate Custom Report
-                        </button>
-                    </div>
+            <div class="activity-content">
+                <div class="activity-description">${activity.description}</div>
+                <div class="activity-time">
+                    <i class="fas fa-user"></i> ${activity.user} | 
+                    <i class="fas fa-clock"></i> ${formatActivityTime(activity.timestamp)}
                 </div>
             </div>
         </div>
-    </div>
+    `).join('');
+}
 
-    <div id="notification" class="notification"></div>
+function getActivityIcon(type) {
+    const icons = {
+        login: 'fa-sign-in-alt',
+        settings: 'fa-cog',
+        messages: 'fa-envelope',
+        data: 'fa-database'
+    };
+    return icons[type] || 'fa-info-circle';
+}
 
-    <!-- Add Chart.js for analytics -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.0/chart.min.js"></script>
-    <script src="admin.js"></script>
-</body>
-</html>
+function formatActivityTime(timestamp) {
+    const date = new Date(timestamp);
+    const now = new Date();
+    const diff = Math.floor((now - date) / 1000); // difference in seconds
+
+    if (diff < 60) return 'Just now';
+    if (diff < 3600) return `${Math.floor(diff / 60)} minutes ago`;
+    if (diff < 86400) return `${Math.floor(diff / 3600)} hours ago`;
+    return date.toLocaleDateString();
+}
+
+function filterActivityLog() {
+    updateActivityLog();
+}
+
+function clearActivityLog() {
+    if (confirm('Are you sure you want to clear the activity log?')) {
+        localStorage.setItem('activityLog', '[]');
+        updateActivityLog();
+        showNotification('Activity log cleared successfully', 'success');
+        logActivity('data', 'Cleared activity log');
+    }
+}
+
+function exportActivityLog() {
+    const activities = JSON.parse(localStorage.getItem('activityLog')) || [];
+    const csv = [
+        ['Timestamp', 'Type', 'User', 'Description'],
+        ...activities.map(a => [
+            a.timestamp,
+            a.type,
+            a.user,
+            a.description
+        ])
+    ].map(row => row.join(',')).join('\n');
+
+    downloadFile('activity_log.csv', csv);
+    logActivity('data', 'Exported activity log');
+}
+
+// Report Generation Functions
+function generateReport(type) {
+    const data = gatherReportData(type);
+    const report = formatReportData(type, data);
+    downloadFile(`${type}_report.csv`, report);
+    showNotification(`${type} report generated successfully`, 'success');
+    logActivity('data', `Generated ${type} report`);
+}
+
+function generateCustomReport() {
+    const startDate = document.getElementById('reportStartDate').value;
+    const endDate = document.getElementById('reportEndDate').value;
+    const metrics = Array.from(document.querySelectorAll('.checkbox-group input:checked'))
+        .map(cb => cb.value);
+
+    if (!startDate || !endDate) {
+        showNotification('Please select both start and end dates', 'error');
+        return;
+    }
+
+    if (metrics.length === 0) {
+        showNotification('Please select at least one metric', 'error');
+        return;
+    }
+
+    const reportData = {};
+    metrics.forEach(metric => {
+        reportData[metric] = gatherReportData(metric, startDate, endDate);
+    });
+
+    const report = formatCustomReport(reportData, startDate, endDate);
+    downloadFile('custom_report.csv', report);
+    showNotification('Custom report generated successfully', 'success');
+    logActivity('data', 'Generated custom report');
+}
+
+function gatherReportData(type, startDate = null, endDate = null) {
+    let data;
+    switch(type) {
+        case 'messages':
+            data = JSON.parse(localStorage.getItem('contactMessages')) || [];
+            break;
+        case 'visitors':
+            data = JSON.parse(localStorage.getItem('visitorData')) || [];
+            break;
+        case 'performance':
+            data = calculatePerformanceMetrics();
+            break;
+    }
+
+    if (startDate && endDate) {
+        const start = new Date(startDate);
+        const end = new Date(endDate);
+        data = data.filter(item => {
+            const date = new Date(item.timestamp || item.date);
+            return date >= start && date <= end;
+        });
+    }
+
+    return data;
+}
+
+function formatReportData(type, data) {
+    let csv = '';
+    switch(type) {
+        case 'messages':
+            csv = formatMessagesReport(data);
+            break;
+        case 'visitors':
+            csv = formatVisitorsReport(data);
+            break;
+        case 'performance':
+            csv = formatPerformanceReport(data);
+            break;
+    }
+    return csv;
+}
+
+function formatMessagesReport(messages) {
+    return [
+        ['Date', 'Name', 'Email', 'Message', 'Priority', 'Status'],
+        ...messages.map(m => [
+            m.date,
+            m.name,
+            m.email,
+            m.message,
+            m.priority || 'low',
+            m.marked ? 'Marked' : 'Unmarked'
+        ])
+    ].map(row => row.join(',')).join('\n');
+}
+
+function formatVisitorsReport(visitors) {
+    return [
+        ['Date', 'IP', 'Country', 'City', 'Device', 'Browser', 'Time Spent'],
+        ...visitors.map(v => [
+            v.timestamp,
+            v.ip,
+            v.location?.country || 'Unknown',
+            v.location?.city || 'Unknown',
+            v.device?.type || 'Unknown',
+            v.browser?.name || 'Unknown',
+            formatTime(v.timeSpent || 0)
+        ])
+    ].map(row => row.join(',')).join('\n');
+}
+
+function formatPerformanceReport(metrics) {
+    return [
+        ['Metric', 'Value'],
+        ...Object.entries(metrics)
+    ].map(row => row.join(',')).join('\n');
+}
+
+function formatCustomReport(data, startDate, endDate) {
+    let csv = `Custom Report (${startDate} to ${endDate})\n\n`;
+    
+    Object.entries(data).forEach(([metric, values]) => {
+        csv += `\n${metric.toUpperCase()} METRICS\n`;
+        csv += formatReportData(metric, values);
+        csv += '\n\n';
+    });
+    
+    return csv;
+}
+
+function downloadFile(filename, content) {
+    const blob = new Blob([content], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    a.click();
+    window.URL.revokeObjectURL(url);
+}
+
+// Add CSS styles for modal
+const styles = `
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0,0,0,0.5);
+    }
+    .modal-content {
+        background-color: #fefefe;
+        margin: 5% auto;
+        padding: 20px;
+        border-radius: 8px;
+        width: 80%;
+        max-width: 800px;
+        max-height: 80vh;
+        overflow-y: auto;
+    }
+    .close {
+        color: #aaa;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+        cursor: pointer;
+    }
+    .close:hover {
+        color: #000;
+    }
+    .visitor-details {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 20px;
+        margin-top: 20px;
+    }
+    .detail-section {
+        background: #f8f9fa;
+        padding: 15px;
+        border-radius: 8px;
+    }
+    .detail-section h3 {
+        margin-top: 0;
+        color: #2c3e50;
+        border-bottom: 2px solid #eee;
+        padding-bottom: 10px;
+    }
+    .detail-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 10px;
+    }
+    .detail-table th,
+    .detail-table td {
+        border: 1px solid #ddd;
+        padding: 8px;
+        text-align: left;
+    }
+    .detail-table th {
+        background: #f5f5f5;
+    }
+    .table-filters {
+        margin-bottom: 20px;
+        display: flex;
+        gap: 10px;
+        align-items: center;
+    }
+    .search-input {
+        padding: 8px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        width: 200px;
+    }
+    .filter-select {
+        padding: 8px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+    }
+    .table-wrapper {
+        overflow-x: auto;
+    }
+    .btn-info {
+        background: #3498db;
+        color: white;
+        border: none;
+        padding: 5px 10px;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+    .btn-info:hover {
+        background: #2980b9;
+    }
+`;
+
+// Add styles to document
+const styleSheet = document.createElement('style');
+styleSheet.textContent = styles;
+document.head.appendChild(styleSheet);
+
+// Event listeners
+document.getElementById('searchBox').addEventListener('input', () => {
+    currentPage = 1;
+    applyFiltersAndSearch();
+});
+
+document.getElementById('filterSelect').addEventListener('change', () => {
+    currentPage = 1;
+    applyFiltersAndSearch();
+});
+
+// Auto-refresh for visitor stats
+setInterval(() => {
+    if (document.getElementById('visitorsSection').classList.contains('active')) {
+        loadVisitorStats();
+    }
+}, 30000); // Refresh every 30 seconds
+
+// Initialize when document loads
+document.addEventListener('DOMContentLoaded', () => {
+    // Check if user is already logged in (in real world, use proper session management)
+    const isLoggedIn = false; // Set this based on your authentication logic
+    if (isLoggedIn) {
+        document.getElementById('loginForm').style.display = 'none';
+        document.getElementById('adminContent').style.display = 'block';
+        initializeCharts(); // Initialize charts first
+        loadMessages();
+        loadVisitorStats(); // Load visitor statistics
+        loadSettings(); // Load saved settings
+    }
+});
+
+function setPriority(index) {
+    const messages = JSON.parse(localStorage.getItem('contactMessages')) || [];
+    if (index >= 0 && index < messages.length) {
+        const priorities = ['low', 'medium', 'high'];
+        const currentPriority = messages[index].priority || 'low';
+        const currentIndex = priorities.indexOf(currentPriority);
+        const nextIndex = (currentIndex + 1) % priorities.length;
+        messages[index].priority = priorities[nextIndex];
+        localStorage.setItem('contactMessages', JSON.stringify(messages));
+        loadMessages(); // Refresh the messages display
+        showNotification(`Message priority set to ${priorities[nextIndex]}`, 'success');
+        logActivity('messages', `Set message #${index + 1} priority to ${priorities[nextIndex]}`);
+    }
+}
+
+function markAsSpam(index) {
+    try {
+        const messages = JSON.parse(localStorage.getItem('contactMessages')) || [];
+        if (index >= 0 && index < messages.length) {
+            messages[index].isSpam = !messages[index].isSpam;
+            messages[index].marked = messages[index].isSpam; // Auto-mark spam messages
+            localStorage.setItem('contactMessages', JSON.stringify(messages));
+            loadMessages();
+            
+            const action = messages[index].isSpam ? 'marked as spam' : 'unmarked as spam';
+            showNotification(`Message ${action} successfully`, 'success');
+            logActivity('messages', `Message #${index + 1} ${action}`);
+            
+            // Update spam rate in analytics
+            updateAnalytics(messages);
+        }
+    } catch (error) {
+        console.error('Error marking message as spam:', error);
+        showNotification('Error marking message as spam', 'error');
+    }
+}
