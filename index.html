@@ -10,6 +10,7 @@ hello there, I'm Rehan, a creative developer passionate about building immersive
     <meta name="theme-color" content="#0a0a0a">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="icon" type="image/jpg" href="profile-avatar.jpg">
     <title>3D Portfolio | Creative Developer</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -20,7 +21,7 @@ hello there, I'm Rehan, a creative developer passionate about building immersive
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.0/gsap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.0/ScrollTrigger.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/examples/js/controls/OrbitControls.js"></script>
-    <link rel="icon" href="images/profile-avatar.jpg" type="image/png">
+  
 </head>
 <body>
     <div id="loading-screen">
@@ -425,27 +426,30 @@ hello there, I'm Rehan, a creative developer passionate about building immersive
                         <p>Kalyan Wast</p>
                     </div>
                 </div>
-                <form id="contact-form" class="contact-form">
-                    <div class="form-group">
-                        <input type="text" id="name" required>
-                        <label for="name">Your Name</label>
-                        <div class="form-bar"></div>
-                    </div>
-                    <div class="form-group">
-                        <input type="email" id="email" required>
-                        <label for="email">Your Email</label>
-                        <div class="form-bar"></div>
-                    </div>
-                    <div class="form-group">
-                        <textarea id="message" required></textarea>
-                        <label for="message">Your Message</label>
-                        <div class="form-bar"></div>
-                    </div>
-                    <button type="submit" class="btn-submit">
-                        <span>Send Message</span>
-                        <i class="fas fa-paper-plane"></i>
-                    </button>
-                </form>
+                <div class="contact-content">
+                    <form id="contactForm" class="contact-form">
+                        <div class="form-group">
+                            <input type="text" id="name" name="name" required>
+                            <label for="name">Your Name</label>
+                            <div class="form-bar"></div>
+                        </div>
+                        <div class="form-group">
+                            <input type="email" id="email" name="email" required>
+                            <label for="email">Your Email</label>
+                            <div class="form-bar"></div>
+                        </div>
+                        <div class="form-group">
+                            <textarea id="message" name="message" required></textarea>
+                            <label for="message">Your Message</label>
+                            <div class="form-bar"></div>
+                        </div>
+                        <button type="submit" class="btn-submit">
+                            <span>Send Message</span>
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </form>
+                    <div id="formMessage" class="form-message"></div>
+                </div>
             </div>
         </section>
     </main>
@@ -567,5 +571,6 @@ hello there, I'm Rehan, a creative developer passionate about building immersive
         });
     </script>
     <script src="script.js"></script>
+    <script src="js/visitor-tracker.js"></script>
 </body>
 </html>
