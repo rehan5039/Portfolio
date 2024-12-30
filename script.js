@@ -532,27 +532,42 @@ function initAnimations() {
 }
 
 // Form Handling
-const contactForm = document.getElementById('contact-form');
+const contactForm = document.getElementById('contactForm');
+const formMessage = document.getElementById('formMessage');
+
 contactForm.addEventListener('submit', function(e) {
     e.preventDefault();
     
-    // Animate button on submit
-    const button = this.querySelector('button');
-    gsap.to(button, {
-        scale: 0.95,
-        duration: 0.1,
-        yoyo: true,
-        repeat: 1
-    });
-    
-    // Get form data
-    const formData = new FormData(this);
-    const data = Object.fromEntries(formData);
-    
-    // Here you would typically send the data to a server
-    console.log('Form submitted:', data);
-    
-    // Show success message
-    this.reset();
-    alert('Thank you for your message! I will get back to you soon.');
+    const formData = {
+        name: document.getElementById('name').value,
+        email: document.getElementById('email').value,
+        message: document.getElementById('message').value,
+        date: new Date().toLocaleString()
+    };
+
+    try {
+        // Get existing messages or initialize empty array
+        const messages = JSON.parse(localStorage.getItem('contactMessages')) || [];
+        
+        // Add new message
+        messages.push(formData);
+        
+        // Save back to localStorage
+        localStorage.setItem('contactMessages', JSON.stringify(messages));
+        
+        // Show success message
+        formMessage.textContent = 'Message sent successfully!';
+        formMessage.style.color = 'green';
+        
+        // Clear form
+        contactForm.reset();
+        
+        setTimeout(() => {
+            formMessage.textContent = '';
+        }, 3000);
+    } catch (error) {
+        console.error('Error saving message:', error);
+        formMessage.textContent = 'Error sending message. Please try again.';
+        formMessage.style.color = 'red';
+    }
 });
